@@ -162,4 +162,61 @@ book2.addTheme("Corruption")
 console.log(book1.themes) 
 console.log(book2.themes) 
 
-/*UNDERSTAND THE PROTOTYPE CHAIN */
+/*UNDERSTAND THE PROTOTYPE CHAIN
+
+the prototype property on construction functions enable me to immediately pass methods to all objects that were created by it. 
+with the challenge above, added a function to the constructor function's prototype that made an object and immediately added a method
+to all of the instantiated objects. this process is called prototypical inheritance. 
+
+prototypical inheritance: each of the created objects from a constructor function inherits from its constructors prototype. 
+a more concise way to explain: each instantiated object (from constructor function) inherits from prototype. 
+every object has this prototype property.  
+
+make sure to not modify the original Object() prototype. doing so will effectively change the language itself and will have untold
+consequences on the operations of my program. instead of changing Object(), make a constructor function to instantiate a new object 
+and add functionality to newly created object. all methods and properties comes from Object()*/
+
+console.log(Object.getPrototypeOf({})); //returns {}
+
+//after getting prototype, can chain on property constructor. this tells me what the constructor function was for the created object.  
+console.log(Object.getPrototypeOf({}).constructor); // returns Object()
+
+//if i use Object() as a constructor function, it returns an object {}
+console.log(new Object()); //returns {}
+
+/*to look at the prototype of one of the students i created (student1), its constructor function is Student:
+    Student(id, name, subjects = [])
+
+considering the nature of objects as reference types, can understand why this happens. by way of prototypical inheritance, objects refer 
+to their constructor functions prototype and therefore can access any of its methods. this is why i was able to add a method to the 
+prototype for the Student object, example = Student.prototype.addStudent = (). as a result, methods will be immediately available 
+to any instantiated object. 
+
+prototypes form a chain leading back to the original object; which gives all of the objects methods. this can be seen visually using an 
+alternate way of accessing the objects prototype. this alternate way is the dunder prototype property; shortened to the 'dunder proto' 
+or __proto__.  */
+
+function Student(id, name, subjects = []) {
+    this.id = id;
+    this.name = name;
+    this.subjects = subjects;
+  }
+  const student1 = new Student(1, 'Reed');
+  console.log(Object.getPrototypeOf(student1).constructor);  //returns Student(id, name, subjects = [])
+
+//using 'dunder proto' to show the immediate prototype student1 is pointing to
+console.log(student1.__proto__); //returns Student; which is the Student function constructor
+
+//confirm its pointing to the Student prototype by making following comparison. 
+console.log(student1.__proto__ === Student.prototype); //returns true
+
+/*to see that prototypes perform a chain, can add another 'dunder proto' after the student prototype. this = the original Object prototype. 
+Object.prototype forms the end of the chain; since all of the objects methods and properties come from it. 
+*/
+console.log(student1.__proto__.__proto__ === Object.prototype); //returns true.
+
+//to get the prototype of Object.prototype, chain on another 'dunder proto'. 
+console.log(student1.__proto__.__proto__.__proto__); //returns null
+
+
+/*EASY PROTOTYPICAL INHERITANCE WITH CLASSES */
