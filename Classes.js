@@ -45,7 +45,8 @@ to create a student, i need to call the constructor function. to call the constr
 arguments which are id, name, and subjects array: new Student(1, 'Reed', []). but setting array as default parameter in constructor 
 function (= []). only need to provide 1st 2 arguments when calling constructor function:  revised to new Student(1, 'Reed'). 
 
-this process instantiates or creates a new instance or object of Student using the constructor function of the same name.  */
+this process instantiates or creates a new instance or object of Student using the constructor function of the same name. 
+instantiate means to provide an instance of.  */
 
 //constructor function
 function Student(id, name, subjects = []) {//adding default parameter for the 3rd parameter which is an array
@@ -176,13 +177,13 @@ make sure to not modify the original Object() prototype. doing so will effective
 consequences on the operations of my program. instead of changing Object(), make a constructor function to instantiate a new object 
 and add functionality to newly created object. all methods and properties comes from Object()*/
 
-console.log(Object.getPrototypeOf({})); //returns {}
+console.log(Object.getPrototypeOf({}))  //returns {}
 
 //after getting prototype, can chain on property constructor. this tells me what the constructor function was for the created object.  
-console.log(Object.getPrototypeOf({}).constructor); // returns Object()
+console.log(Object.getPrototypeOf({}).constructor)  // returns Object()
 
 //if i use Object() as a constructor function, it returns an object {}
-console.log(new Object()); //returns {}
+console.log(new Object())  //returns {}
 
 /*to look at the prototype of one of the students i created (student1), its constructor function is Student:
     Student(id, name, subjects = [])
@@ -192,31 +193,182 @@ to their constructor functions prototype and therefore can access any of its met
 prototype for the Student object, example = Student.prototype.addStudent = (). as a result, methods will be immediately available 
 to any instantiated object. 
 
-prototypes form a chain leading back to the original object; which gives all of the objects methods. this can be seen visually using an 
-alternate way of accessing the objects prototype. this alternate way is the dunder prototype property; shortened to the 'dunder proto' 
+prototypes form a chain leading back to the original object  which gives all of the objects methods. this can be seen visually using an 
+alternate way of accessing the objects prototype. this alternate way is the dunder prototype property  shortened to the 'dunder proto' 
 or __proto__.  */
 
 function Student(id, name, subjects = []) {
-    this.id = id;
-    this.name = name;
-    this.subjects = subjects;
+    this.id = id 
+    this.name = name 
+    this.subjects = subjects 
   }
-  const student1 = new Student(1, 'Reed');
-  console.log(Object.getPrototypeOf(student1).constructor);  //returns Student(id, name, subjects = [])
+  const student1 = new Student(1, 'Reed') 
+  console.log(Object.getPrototypeOf(student1).constructor)   //returns Student(id, name, subjects = [])
 
 //using 'dunder proto' to show the immediate prototype student1 is pointing to
-console.log(student1.__proto__); //returns Student; which is the Student function constructor
+console.log(student1.__proto__)  //returns Student  which is the Student function constructor
 
 //confirm its pointing to the Student prototype by making following comparison. 
-console.log(student1.__proto__ === Student.prototype); //returns true
+console.log(student1.__proto__ === Student.prototype)  //returns true
 
 /*to see that prototypes perform a chain, can add another 'dunder proto' after the student prototype. this = the original Object prototype. 
-Object.prototype forms the end of the chain; since all of the objects methods and properties come from it. 
+Object.prototype forms the end of the chain  since all of the objects methods and properties come from it. 
 */
-console.log(student1.__proto__.__proto__ === Object.prototype); //returns true.
+console.log(student1.__proto__.__proto__ === Object.prototype)  //returns true.
 
 //to get the prototype of Object.prototype, chain on another 'dunder proto'. 
-console.log(student1.__proto__.__proto__.__proto__); //returns null
+console.log(student1.__proto__.__proto__.__proto__)  //returns null
 
 
-/*EASY PROTOTYPICAL INHERITANCE WITH CLASSES */
+/*EASY PROTOTYPICAL INHERITANCE WITH CLASSES 
+
+many javascript developers do not understand classes because they do not understand the prototype chain and how it works. 
+
+classes and construction functions operate in the same way. classes are just a cleaner way to work with the construction 
+functions and the prototype. 
+
+console.log(typeof class Student {}) //classes are function. returns function
+
+to declare a class us the 'class' keyword and uses the same naming convention as constructors where the 1st letter should be capitalized.
+like a constructor function, it has a body of curly braces {}. unlike a constructor function, it does not have parenthesis () for 
+parameters. classes and functions are not different. classes are functions. the purpose of classes are the same as constructor functions
+which is to share create objects with shared behavior or methods.  
+
+with constructor functions, i declare methods on the prototype property such as Student.prototype.method. with classes, i write the
+methods that i want to add to each instantiated object directly on the class body (within the function body {}) using the same syntax
+used for objects. to create properties, use a special method called the constructor. the constructor method should always be the 1st i
+declare in my class if i need to create any properties:  
+    
+class Student {
+  constructor() {}    -> method to create properties 
+    
+  addSubject() {}     -> methods for each instantiated object 
+}
+
+to create a new student, call the class/instantiate the class as did with the constructor function using 'new' keyword.
+
+instantiating classes come with improvements over constructors. 1st is i will get an error if i do not use the keyword 'new' when 
+instantiating or calling the function. this will result in a type error: 
+there are also no commas after methods, as used when working with an object literal. class methods are not properties unlike object methods, 
+so commas are not needed. 
+
+any methods included in the class body are not going to be immediate properties of the class. will not be able to say Student.addSubject.
+the methods will be declared and available on the prototype: Student.prototype.addSubject. 
+
+once i have an instance of the class, an instantiated object, i can access anything off of it using the dot syntax. this includes the 
+properties made in the constructor, the instance properties such as 'this.id = id'. as well as any methods declared in the body:  
+    student1.id
+
+all data on javascript classes are public. some languages provides option to mark public or private. 
+
+also have full access to the 'this' context in the methods on the class body if i call them directly on an instance of a class. */
+
+class Student {} //classes are written w/o parameters 
+
+class Student {
+    constructor(id, name, subjects = []) {
+      this.id = id     //use 'this' to create instance properties of the same parameter names.
+      this.name = name 
+      this.subjects = subjects       
+    }   
+      
+    addSubject() {}  
+  }
+  const student1 = new Student(1, 'Reed')  //calling function/passing arguments to the constructor. creates an instantiated student. 
+  console.log(student1)  //returns Student. 
+  //const student1 = Student(1, 'Reed')  //did not use 'new'. will result in TypeError: Class constructor Student cannot be invoked without 'new' 
+ console.log(Student.addSubject) //returns null. addSubject is not an immediate property of the class. this is undefined. 
+ console.log(Student.prototype.addSubject) //returns ƒ(), a function. instantiated methods are declared/available on prototype. 
+
+//once i have an instance of the class, an instantiated object, i can access anything off of it using the dot syntax.
+console.log(student1.id)  //accessing instance properties. returns 1
+console.log(student1.addSubject())  //accessing method. returns null because currently method is not doing anything. 
+
+/*have full access to the 'this' context in the methods on the class body if i call them directly on an instance of a class. 
+for example, method getStudentName returns the text Student: and the interpolated (means to insert) student name from this.name
+using student1, call getStudentName to get the appropriate value for the instance property name for that student. 
+*/
+class Student {
+    constructor(id, name, subjects = []) {
+      this.id = id 
+      this.name = name 
+      this.subjects = subjects       
+    }  
+      
+    getStudentName() {
+      return `Student: ${this.name}`  
+    }
+      
+    addSubject() {}  
+  }
+  const student1 = new Student(1, 'Reed') 
+  console.log(student1.getStudentName())  //returns Student: Reed
+
+
+/*Challenge
+
+1. A school's film club wants to store details of the films it has studied so far this year. 
+Create a new class to do this. We want to store the following data about each film: id, title, director, releaseYear and genres[].
+
+2. Create two methods on the class: one for adding multiple genres to the films - addGenre(genre) 
+and one to get the title of the film - getFilmTitle().
+
+3. Instantiate a new instance of the class using data from your favourite film. 
+Add at least 1 genre to your film using addGenre(), and get the title using getFilmTitle()
+*/
+
+//creating class and methods
+class Film {
+    constructor(id, title, director, releaseYear, genres=[]){  //pass data when constructing new instances of Film class
+        this.id = id     //ensures arguments passed to class when instantiating new classes are available using 'this' keyword
+        this.title = title
+        this.director = director
+        this.releaseYear = releaseYear
+        this.genres = genres
+    }
+
+    addGenre(genre) {  //creating method. method accepts parameter and is updating the this.genres array.
+        this.genres = [...this.genres, genre ]  //using array spread to get current array and adding new genre to end of array
+    }
+
+    getFilmTitle() {  //creating method. using a temperal literal to return Title and the interpolated title name from this.title
+        return `Title: ${this.title}`
+    }
+	
+}
+//instantiating new instance of class/creating an instance
+const film1 = new Film(1, 'Days Of Future Past', 'Bryan Singer', 2014)
+const film2 = new Film(2, 'Avengers Endgame', 'Joe Russo, Anthony Russo', 2019)
+
+console.log(film1)  //returns Film { id: 1, title: 'Days Of Future Past', director: 'Bryan Singer', releaseYear: 2014, genres: [] } 
+console.log(film2) //returns Film { id: 2, title: 'Avengers Endgame', director: 'Joe Russo, Anthony Russo', releaseYear: 2019, genres: [] }  
+film2.addGenre('SciFi')
+console.log(film2) //returns Film { id: 2, title: 'Avengers Endgame', director: 'Joe Russo, Anthony Russo', releaseYear: 2019, genres: ['SciFi'] }
+console.log(film2.genres) // accessing genres property directly. returns [ 'SciFi' ]
+console.log(film2.getFilmTitle()) //invoking the getFimTitle() function. returns Title: Avengers Endgame
+
+
+//Another Solution
+class Film {
+	constructor(id, title,director, releaseYear, genres = []) {
+		this.id = id 
+		this.title = title 
+		this.director = director 
+		this.releaseYear = releaseYear 
+		this.genres = genres 
+	}
+	addGenre(genre) {
+		this.genres = [...this.genres, genre] 
+	}	
+	getFilmTitle() {
+		return `Film: ${this.title}`
+	}
+}
+const myFavouriteFilm = new Film(1, "Rear Window", "Afred Hitchcock", "1954") 
+console.log(myFavouriteFilm.director) //returns Afred Hitchcock
+myFavouriteFilm.addGenre("Thriller") 
+console.log(myFavouriteFilm.genres)  //returns ["Thriller"]
+console.log(myFavouriteFilm.getFilmTitle())   //returns Film: Rear Window
+
+
+/*SHARE CLASS FEATURES WITH EXTENDS */
