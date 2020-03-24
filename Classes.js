@@ -371,4 +371,8 @@ console.log(myFavouriteFilm.genres)  //returns ["Thriller"]
 console.log(myFavouriteFilm.getFilmTitle())   //returns Film: Rear Window
 
 
-/*SHARE CLASS FEATURES WITH EXTENDS */
+/*SHARE CLASS FEATURES WITH EXTENDS 
+
+developing an app for home retail store
+
+*/
