@@ -1,4 +1,13 @@
-/*WHAT ARE CONSTRUCTOR FUNCTIONS 
+/*
+includes the core feature of classes: 
+  1. create class instances
+  2. create instance properties with constructor methods
+  3. use methods on the class bodies
+  4. extend parent classes 
+
+
+
+WHAT ARE CONSTRUCTOR FUNCTIONS 
 
 the application below is for a school to help manage their students. for each student, want to keep track of the student's id, name, 
 and subjects they are taking. i want to dynamically add subjects to the subjects array. the school currently has 1 student and i have
@@ -373,6 +382,226 @@ console.log(myFavouriteFilm.getFilmTitle())   //returns Film: Rear Window
 
 /*SHARE CLASS FEATURES WITH EXTENDS 
 
-developing an app for home retail store
+once app has been created and i've created multiple products, i learned that i need to add another property to the class. one approach
+is to add the property to the class and update each of the individual existing products with the new property. this can become labor 
+intensive if i had 1k products. 
 
+instead of changing a class after i created one, i can create a new class and take the info i need from the old class. because of the 
+shareable nature of prototypes, i can link one classes prototype to another classes prototype. i can create a new class with a name that 
+is a modified variant of the initial class  Product and SalesProduct. the name of the new class implies a shared relationship between 
+the two classes. 
+
+the new class can inherit or borrow the classes from the original by using the extends keyword, such as SaleProduct extends Product.
+this can be read as SalesProduct is using or extending properties from the Product class. */
+
+class Product {
+  constructor(name, price, discountable) {
+    this.name = name 
+    this.price = price 
+    this.discountable = discountable   
+  }  
+}
+const product1 = new Product("Coffee Maker", 99, true)  //creating a new product 
+
+//Adding an additional class using extends. 
+class SaleProduct extends Product {  //extends allows SaleProduct class to use the properties of Product class
+  constructor(percentOff) {          //adding new property for the product % off. SaleProduct will include borrowed and new properties
+     this.percentOff = percentOff  
+  }  
+}
+/* based upon the additional class using extends, should return properties from Product + new property percentOff. instead get a ReferenceError:
+ReferenceError: Must call super constructor in derived class before accessing 'this' or returning from derived constructor.
+
+SaleProduct is the derived class. what the error is saying is that i am trying to create a new product by extending Product (parent class)
+but not telling it to do so. meaning not calling the super constructor. super() is a function that is used in the constructor method
+(derived constructor) that calls the constructor method of the class that is extending (parent class in this example). 
+
+if i am extending a parent class but do not call super() in the derived constructor, the parent instance will not be created and will not
+be able to use 'this' as a result. so call super() and pass along values that will be extended. pass all values (including new property) 
+to constructor.  if i were to console log() this based upon existing extend statement, i will get the ReferenceError. */
+const product1 = new SaleProduct("Coffee Maker", 99, true, 20)//return ReferenceError because derived constructor is not calling constructor method on parent class
+
+//using super() to call the constructor method on the Product class. statements reuses/extends a Product class for its instance properties. 
+class SaleProduct extends Product {
+  constructor(name, price, discountable, percentOff) { //constructor() includes all properties  from parent class + new class 
+     super(name, price, discountable)  //super() only includes properties from extended/parent class. passing values to Product constructor
+     this.percentOff = percentOff  //using 'this' to access the new property
+  }  
+}
+const product1 = new SaleProduct("Coffee Maker", 99, true, 20) 
+console.log(product1) //now using super(), successfully returns an instance of SaleProduct
+
+/*updating Product and SalesProduct classes by:  
+  1. adding method to Product class to return true/false value for discountable.  
+  2. adding method to SalesProduct class to execute the method in Product class and determine whether to calculate sales price. 
+
+method isDiscountable() returns this.discountable (returns true or false). this value will determine whether to calculate sales price 
+or not. this will be done by using a method in the SalesProduct class  method called getSalePrice() will include a conditional. 
+based upon conditional, method will calculate price. if no price calculated, tell user product is not eligible. this means i need 
+to execute the isDiscountable() method from within the SalesProduct class. 
+
+use super() to execute the method from parent class  super.isDiscountable(). 
+do not need to call super in this method. can use super like an object with isDiscountable() as a method  super.isDiscountable()
+
+in this app, i am using multiple classes to add properties to existing classes as well as share methods between them. i am establishing 
+a relationship between the parent and child classes. however, changing the behavior of the parent class can unknowingly cause problems
+with the child class. so goal is to keep classes as small as i can and be aware of the relationships i set up between the classes. 
 */
+class Product {
+  constructor(name, price, discountable) {
+    this.name = name 
+    this.price = price 
+    this.discountable = discountable   
+  }  
+  
+  isDiscountable() {  //adding method to determine if product is discountable. evaluates as true or false
+    return this.discountable   
+  }
+}
+
+class SaleProduct extends Product {  //reusing/extending Product class for its instance properties and adding additional property
+  constructor(name, price, discountable, percentOff) {
+     super(name, price, discountable)  //calling super() and passing values to Product constructor
+     this.percentOff = percentOff  
+  }  
+  
+  getSalePrice() { //adding method to determine if whether to calculate discount or return message product is not eligible. 
+     if (super.isDiscountable()) {      //using super to execute isDiscountable() method from parent Product class. not calling super here
+       return this.price * ((100 - this.percentOff) / 100)   //if product discountable (evaluated as true), compute sales price
+     } else {
+        return `${this.name} is not eligible for a discount`  //if product not discountable(evaluated as false), return this
+     }
+  }
+}
+
+const saleProduct1 = new SaleProduct("Coffee Maker", 99, true, 20) 
+console.log(saleProduct1.getSalePrice()) //invoking getSalePrice() function. product is discountable. returns 79.2
+
+const saleProduct1 = new SaleProduct("Coffee Maker", 99, false, 20) 
+console.log(saleProduct1.getSalePrice())  //invoking getSalePrice() function. product not discountable. returns 'Coffee Maker is not eligible for a discount'
+
+/* HOW TO GET, SET AND SIMPLIFY CLASSES 
+
+one of the major challenges with javascript is that there are no private properties by default. consequently, all object properties are 
+accessible by anyone, which means they can be mutated at anytime. 
+
+in the Product class below, there is property called price, that is initially set in the constructor. there is also a method that gets the
+clearance price of a product (which is 50% off). a user of the class can access the property on an instance by saying: product1.price. 
+this will return 99.95, which is the argument that was passed. 
+
+because an instance of a class or constructor function is just an object, the price property can be changed at will. besides having a user
+change the prices, methods of the class (getClearancePrice) can be broken if a non number is provided where developer intended a number. 
+currently, javascript does not allow for marking classes/data private, but can use 2 special class features to as a workaround. these 
+features are getters and setters. */
+
+class Product {
+  constructor(name, price, discountable) {
+    this.name = name 
+    this.price = price 
+    this.discountable = discountable 
+  }
+
+  getClearancePrice() {
+    return this.price * 0.5 
+  }
+}
+const product1 = new Product("Coffee Maker", 99.95, false) //creating an instance of the class
+console.log(product1.price) //accessing the property on an instance. returns 99.95
+
+/*if i directly mutate the price property by providing it an empty object, this will be a problem when i invoke/execute the method
+getClearancePrice(). this returns null (undefined) because i passed in an object but method was expecting a number for calculation */
+product1.price = {} 
+console.log(product1.getClearancePrice()) //accessing property and calling the getClearancePrice() method. returns null
+
+/* USING A GETTER AND SETTER 
+
+to execute a method, we take the instance (product1) and call the method getClearancePrice() with a set of () -> product1.getClearancePrice()
+instead of invoking a method in this manner, can turn getClearancePrice to a getter. this approach will still operate as a method, but will
+be used like a property; meaning remove the () in order to execute the method. 
+
+to create a getter, add the keyword 'get' in front of the method. in this example, since get is repeated 2x, can remove the prefix from 
+the method name. so i can run the method just like it is a property -> product1.clearancePrice. this makes the value easier to retrieve 
+but does not fix the problem of a user setting a value that is an invalid type. to fix this, i need a corresponding setter. 
+
+a setter works similar to a getter by using the same syntax. however, it does the opposite. it is a method that works like a property.
+but a setter accepts a single argument and 'changes' a property rather than retrieves it. don't pass the argument using (). instead pass 
+the value to the method using the '=' operator. 
+
+to create a setter, add the keyword 'set' in front of the method. inside the method, i can change an instance properties value. 
+since i am calling the setter newPrice(), i want to take the price that its passed and use it to update the price instance property. 
+with setters, need to have a corresponding getter. otherwise, cannot retrieve the value that was set. its good practice to pair getters
+and setters. they can both have the same method name. but cannot have an instance property available on 'this' with the same name as 
+getter and/or setter (for example, could not name getter/setter price because it conflicts with the price instance property). doing so will 
+likely freeze application and cause an infinite loop. 
+
+can use another property that connects the getter and setter with a property that i want to get and update. do not want developers and users
+to access this 'bridge property'. i want this bridge property to be for internal use only. a way to indicate to other developers that a 
+property shouldn't be modified is by prefixing the property with an underscore. a class that has a property that begins with an 
+underscore is a way for developers to communicate that it should not be used outside the class itself or be directly mutated. 
+after i set an intermediate property, i can set use getters and setters with the same name but minus the underscore to access or update
+the value. these are steps towards addressing the problem of price or other properties being directly mutated.
+
+to create the bridge property to be able to create the appropriate getters and setters, change this.price in the constructor to
+_this.price. changing this ensures that it doesn't conflict with getter/setter that will be changed to price.
+
+getters and setters can be a double edged sword. they are helpful by preventing mutations from breaking application. but can be confusing 
+because they are methods operating as if they were properties. 
+
+on the client side, ultimately none of the data in javascript is secure or private. if i need to keep data private (such as user password)
+this data needs cannot be managed or made unavailable on client side javascript. 
+
+the goal of getters/setters and these pseudo private properties prefixed with underscores is a way to signal to other developers that 
+certain properties are important and should not be used outside of the class. 
+*/
+
+//updating Product class with getters and setters
+class Product {
+  constructor(name, price, discountable) {
+    this.name = name 
+    this.price = price 
+    this.discountable = discountable 
+  }
+
+  get clearancePrice() {       //creating getter. 
+    return this.price * 0.5   //returning number which is 50% of the price that was passed when creating instance of class
+  }
+
+  set newPrice(price) {      //creating setter. its a method that works like a property. accepts an argument, and changes a property
+    this.price = price      //passing value to the method using the = operator. changing the instance property value
+ }
+
+}
+const product1 = new Product("Coffee Maker", 99.95, false) 
+console.log(product1.clearancePrice)  //no longer calling method. now accessing method like a property. returns correct value of 49.975
+
+product1.newPrice = 20 
+console.log(product1.newPrice)       //returns null because there is no intermediate property that connects the getter and setter
+
+//updated Product class with bridge property connecting getter and setter. 
+class Product {
+  constructor(name, price, discountable) {
+    this.name = name 
+    this._price = price           //updated from price to _price
+    this.discountable = discountable 
+  }
+
+  get price() {                 //updated name of getter
+    return this._price          //removed functionality that got clearance price. now returning this._price
+  }
+
+  set price(price) {          //updated name of setter. accepts price that is passed to it, will reject value if type not a valid number.
+    if (typeof price !== "number") {  //if value passed not equal to the string 'number', then return previous value from this._price
+      return this._price 
+    } else {                         //otherwise set the price that was passed in as an argument.
+      this._price = price           //accepts the price that was passed in and use it to update the price instance property
+    }
+  }
+}
+const product1 = new Product("Coffee Maker", 99.95, false)  //instantiating/creating instance of class. can now access its properties. 
+product1.price = 'aslfdjkas' //update the price by mutating it/using the price setter with an invalid type (not a number) 
+console.log(product1.price)  //returns the original price of 99.95
+
+product1.price = 30   //updating price with a valid number. price update will be successful
+console.log(product1.price)  //returns 30
+
+/**FIX CONTENT PROBLEMS WITH BIND  */
