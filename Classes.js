@@ -517,7 +517,7 @@ console.log(product1.getClearancePrice()) //accessing property and calling the g
 
 to execute a method, we take the instance (product1) and call the method getClearancePrice() with a set of () -> product1.getClearancePrice()
 instead of invoking a method in this manner, can turn getClearancePrice to a getter. this approach will still operate as a method, but will
-be used like a property; meaning remove the () in order to execute the method. 
+be used like a property  meaning remove the () in order to execute the method. 
 
 to create a getter, add the keyword 'get' in front of the method. in this example, since get is repeated 2x, can remove the prefix from 
 the method name. so i can run the method just like it is a property -> product1.clearancePrice. this makes the value easier to retrieve 
@@ -604,4 +604,274 @@ console.log(product1.price)  //returns the original price of 99.95
 product1.price = 30   //updating price with a valid number. price update will be successful
 console.log(product1.price)  //returns 30
 
-/**FIX CONTENT PROBLEMS WITH BIND  */
+/**FIX CONTENT PROBLEMS WITH BIND
+ revising e-commerce app to allow users to 'favorite' a product, store it in their account for review later. users can only do 
+ this if they are signed into their account. if not, tell user to sign into account. 
+ 
+ still have a Product class but also some user data. for each product, have name and price properties. also have a handleFavoriteProduct
+ method which checks to see if a user is authenticated via an isAuth boolean. if user is authenticated, the product will be 'favorited'
+ and will add product to user's array of favorites and alert user that favorite was successful. 
+ 
+ creating an new Product for a coaster and putting it in a variable entitled product1. to simulate user 'favoriting' the product, call 
+ method handleFavoriteProduct. this method can run in response to a user click (learn how to do later). when run code, returns 
+ the product name Coaster followed by favorited! (Coaster favorited!). 
+ 
+ i can delay the response by a second after user adds product to their favorites. to do that, i can use SetTimeout() and pass it
+ this.favoriteProduct(). this will delay the execution of the favoriteProduct() method by 1000 milliseconds or 1 second. however, 
+ when running method, returns favorited!. this is a problem because now missing the products name. what's happening is the value of 'this' 
+ in favoriteProduct() method  console.log(`${this.name} favorited!`) no longer refers to Product class. it is being lost. 
+ 
+ functions create their own context which can change what 'this' refers to, causing unexpected results. since classes are merely functions
+ and can also include functions in the form of methods, have to be aware of problems with binding 'this' correctly in relation to classes. 
+
+ when i used SetTimeOut(), it accepted the favoriteProduct method as a function, but it changed what 'this' was bound to within the method.
+ this is similar to code when i have a function that accepts a callback function and when using the callback function it implicitly changes
+ the 'this' context of it. for example array methods such as map(), filter() and reduce():
+    take an array and use the map method of it and execute a callback and pass a reference to it  -> [].map(callback)
+    for the callback function, can do something with the array elements:
+
+      function callback() {
+   // do something with array elements 
+    }
+
+    combined together: 
+
+    function callback() {
+   // do something with array elements 
+      }
+
+    [].map(callback) 
+
+ arrow functions are helpful when referring to the proper 'this' context. arrow functions do not create a new 'this' binding. instead, 
+ arrow functions refer to the 'this' binding one level above (in the context above). if i were to write this.favoriteProduct within
+ setTimeout() as an inline arrow function, instead of passing it as a reference to setTimeout(), and calling this.favoriteProduct:
+      setTimeout(() => this.favoriteProduct(), 1000) 
+
+ this will result in correct binding and return Coaster favorited!  the binding now works because 'this' within the function now refers 
+ to 1 level up from the SetTimeOut()  which is the Product class. 
+
+ another way to leverage arrow functions to fix the binding issue is to make favoriteProduct a property within the instructor  and take 
+ all of the functionality in the method. remove the arrow function i wrote in setTimeout(). this still bounds correctly and returns
+ Coaster favorited!
+
+ arrow functions will be able to fix the 'this' binding problems with classes the majority of the time. but do not want to stuff all of 
+ the methods into the constructor as properties. an arguably better more expressive solution is to explicity set the 'this' context that 
+ the function refers to. can explicity set the 'this' context thru the bind() method. the bind() method binds the 'this' keyword the 
+ function uses to whatever i need it to be. the favoriteProduct() method always needs to be bound to the Product class in order to get the
+ name (this.name) instance property off of it. to accomplish this, can use bind() where i am executing the favoriteProduct() method 
+ within setTimeout(), i can chain on the bind method() and pass in 'this': 
+      setTimeout(this.favoriteProduct.bind(this), 1000) 
+      
+      this code is saying that the favoriteProduct() method that is within the Product class should always refer to the class and nothing
+      else. 
+ 
+ after i attach bind() to a function, it is bound to the provided 'this' context forever whenever the function is used and cannot be lost.
+ bound() method works and will only be bound correctly to 1 method (ie favoriteProduct). if i want to use favoriteProduct in another method, 
+ i will need to bind it again. basically need to bind a method multiple times. this can be accomplished by making all references to the 
+ method bound properly with bind() by over-riding the method in the constructor. this will ensure that every time i reference 
+ this.favoriteProducts in the class, it is using the bound version of the function. this approach is similar to creating the arrow function
+ in the constructor. the benefit of this approach is that i am leaving methods exactly where they should live, within the class body. they are 
+ merely bound to the correct context in the constructor -> this.favoriteProduct = this.favoriteProduct.bind(this).
+ so ive defined all of the methods in the right place, which is the class body (not the constructor) and declared the properties in the 
+ right place as well, within the constructor. so the constructor is where i can bind the properties. 
+ 
+ all the approaches below are valid, but recommend using the final approach where binding occurs in the constructor. this approach is 
+ the most explicitly binds to the appropriate context.
+
+ might wonder why we can't declare all methods directly on the class body as arrow functions to avoid the problems with 'this'. in the 
+ future, its likely javascript may revise syntax to rewrite classes with methods as arrow functions and remove need for a constructor 
+ method. this syntax is called the 'class fields proposal' and maybe released in future versions of javascript. 
+
+ example of class fields proposal:
+
+      const isAuth = true 
+      const user = {
+        favorites: []
+    } 
+
+class Product {}
+
+  handleFavoriteProduct = () => {
+    if (isAuth) {
+      setTimeout(this.favoriteProduct, 1000) 
+    } else {
+      console.log("You must be signed in to favorite products!") 
+    }
+  }
+
+  favoriteProduct = () => {
+    user.favorites.push(this.name) 
+    console.log(`${this.name} favorited!`) 
+  }
+}  */
+
+/*
+  revising e-commerce app to allow users to 'favorite' a product, store product in their account for review later. users can only do 
+  this if they are signed into their account. if not, tell user to sign into account.
+
+  SetTimeOut() accepts the favoriteProduct method as a function, but it changes what 'this' was bound to within the method. 
+*/
+ const isAuth = true 
+ const user = {
+   favorites: []
+ } 
+ 
+ class Product {
+   constructor(name, price) {
+     this.name = name 
+     this.price = price 
+   }
+ 
+   handleFavoriteProduct() {
+     if (isAuth) { 
+       //this.favoriteProduct()  //running method will return Coaster favorited!
+       setTimeout(this.favoriteProduct, 1000)  //passing favoriteProduct as a reference to setTimeout() to delay favoriteProduct() 
+                                              //method by 1 sec.  this causes a binding issue.  returns favorited! 
+     } else {
+       console.log("You must be signed in to favorite products!") 
+     }
+   }
+ 
+   favoriteProduct() {
+     user.favorites.push(this.name) 
+     console.log(`${this.name} favorited!`) 
+   }
+ }
+ const product1 = new Product('Coaster', 89.99) //creating new product/instance of class and assigning it to a variable. 
+ product1.handleFavoriteProduct() //running code with setTimeout() returns favorited!
+
+/* 
+  revised app to use arrow functions to properly bind 'this'.
+
+  arrow functions are helpful when referring to the proper 'this' context because they do not create a new 'this' binding. instead, 
+  arrow functions refer to the 'this' binding one level above (in the context above). meaning 'this' within the function now refers 
+  to 1 level up from setTimeout() which is the Product class.
+*/ 
+const isAuth = true 
+const user = {
+  favorites: []
+} 
+
+class Product {
+  constructor(name, price) {
+    this.name = name 
+    this.price = price 
+  }
+
+  handleFavoriteProduct() {
+    if (isAuth) {
+      setTimeout(() => this.favoriteProduct(), 1000)  //using arrow functions to write this.favoriteProduct within setTimeout() 
+                                                      //as an inline statement and calling favoriteProduct() method. 
+    } else {
+      console.log("You must be signed in to favorite products!") 
+    }
+  }
+
+  favoriteProduct() {
+    user.favorites.push(this.name) 
+    console.log(`${this.name} favorited!`) 
+  }
+}
+const product1 = new Product('Coaster', 89.99)
+product1.handleFavoriteProduct() //returns Coaster favorited!
+
+/* 
+  revised app by making favoriteProduct a property within the instructor and update with all of the functionality from favoriteProduct()
+  method.
+*/
+const isAuth = true 
+const user = {
+  favorites: []
+} 
+
+class Product {
+  constructor(name, price) {
+    this.name = name 
+    this.price = price 
+    this.favoriteProduct = () => {        //favoriteProduct is now a property within the instructor. using arrow functions. 
+        user.favorites.push(this.name)    //moved all functionality from favoriteProduct() method here. 
+        console.log(`${this.name} favorited!`)  
+    }
+  }
+
+  handleFavoriteProduct() {
+    if (isAuth) {
+      setTimeout(this.favoriteProduct, 1000) 
+    } else {
+      console.log("You must be signed in to favorite products!") 
+    }
+  }
+
+}
+const product1 = new Product('Coaster', 89.99)
+product1.handleFavoriteProduct() //returns Coaster favorited!
+
+/* 
+ revising app to use bind() to bind the favoriteProduct() method to the Product class in order to get the name (this.name) instance 
+ property off of it.  this approach binds a single method to a class. 
+*/
+const isAuth = true 
+const user = {
+  favorites: []
+} 
+
+class Product {
+  constructor(name, price) {
+    this.name = name 
+    this.price = price 
+  }
+
+  handleFavoriteProduct() {
+    if (isAuth) {
+      setTimeout(this.favoriteProduct.bind(this), 1000) //chain bind() to favoriteProduct. ensures method will refer to Product class. 
+    } else {
+      console.log("You must be signed in to favorite products!") 
+    }
+  }
+
+  favoriteProduct() {
+    user.favorites.push(this.name) 
+    console.log(`${this.name} favorited!`) 
+  }
+}
+const product1 = new Product('Coaster', 89.99)
+product1.handleFavoriteProduct() //returns Coaster favorited!
+
+/* 
+ revising app to bind the favoriteProduct() method multiple times. 
+
+ making all references to the method bound properly with bind() by over-riding the method in the constructor. 
+ this will ensure that every time i reference this.favoriteProducts in the class, it is using the bound version of the function. 
+ 
+ this is preferred approach because:
+  1. declared the properties within the constructor. 
+  2. the methods are bound to the correct context in the constructor. 
+  3. defined methods within the class body.  
+*/
+const isAuth = true 
+const user = {
+  favorites: []
+} 
+
+class Product {
+  constructor(name, price) {
+    this.name = name 
+    this.price = price 
+    this.favoriteProduct = this.favoriteProduct.bind(this) //overriding method. binding favoriteProduct method to be used multiple times. 
+  }
+
+  handleFavoriteProduct() {
+    if (isAuth) {
+      setTimeout(this.favoriteProduct, 1000)  //removed reference to 'this' 
+    } else {
+      console.log("You must be signed in to favorite products!") 
+    }
+  }
+
+  favoriteProduct() {
+    user.favorites.push(this.name) 
+    console.log(`${this.name} favorited!`) 
+  }
+}
+const product1 = new Product('Coaster', 89.99)
+product1.handleFavoriteProduct()  //returns Coaster favorited!
